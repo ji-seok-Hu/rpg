@@ -1,5 +1,5 @@
 import random
-
+import time
 
 
 # Monster classes
@@ -114,9 +114,38 @@ class Hero(Body):
         monster.get_damage(harm)
 
         return True
+    def random_attack_ver2(self, monster_list) -> bool:
+        """
+        random_attack(self, monster_list)
+        attacks a random monster on the field
+        Args:
+            monster_list -> List of monster objects
+        Return:
+            False -> attack failed
+            True -> attack succeed
+        """
+        is_mana_enough = self.use_mp(self.random_attack_mp)
+        if not is_mana_enough:
+            return False        
+        harm = self.random_attack_harm
+        
+        
+        monster = monster_list[random.randint(0,len(monster_list) - 1)]
+        monster2 = monster_list[random.randint(0,len(monster_list) - 1)]
+        if len(monster_list) >=2:
+            while True:
+                if monster == monster2:
+                    monster2 = monster_list[random.randint(0,len(monster_list) - 1)]
+                elif monster != monster2:
+                    break
+            monster.get_damage(harm)
+            monster2.get_damage(harm)
+            return True
+        elif len(monster_list) <2:
+            monster.get_damage(harm)
+            return True
         
 
-    
 # Game class
 class Field:
     monster_cls_list = [Slime, Zombie, Skeleton]
@@ -204,8 +233,10 @@ while True:
                 f"1. 기본 공격 (피해 {hero.harm}, 대상 지정)\n" + 
                 f"2. 전체 공격 (피해 {hero.total_attack_harm}, 기력 {hero.total_attack_mp} 소모, 모든 대상 지정)\n" +
                 f"3. 무작위 공격 (피해 {hero.random_attack_harm}, 기력 {hero.random_attack_mp} 소모, 무작위 대상 지정)\n" +
-                f"4. 돌아가기\n"+
-                f"5. 숨겨진 치트키 사용 (체력을 1로 만드는 반 즉사기)"
+                f"4. 스킬사용 <검 부메랑> (피해 {hero.random_attack_harm}, 기력 {hero.random_attack_mp} 소모, 무작위 대상2명 지정 )\n"+
+                f"5. 돌아가기\n"+
+                f"6. 숨겨진 치트키 사용 (체력을 1로 만드는 반 즉사기)"
+
             )
             if selection == "1":
                 Field.status_monster()
@@ -230,13 +261,20 @@ while True:
                     break
                 else:
                     print("기력이 부족합니다.")
-            elif selection == "4" :
-                break
+            elif selection =="4":
+                is_success = hero.random_attack_ver2(Field.return_monsters_all())
+                if is_success:
+                    print(f"당신은 눈을 감고 오직 당신과 검, 이 둘에만 집중합니다. 그리고 크게 검을 휘둘렀습니다.\n 아마 어딘가에는 맞지 않았을까요?")
+                    break
+                else:
+                    print("기력이 부족합니다.")
             elif selection == "5" :
+                break
+            elif selection == "6" :
                 print("당신은 치트키를 사용하다가 실수로 자신을 지정하였습니다.")
                 hero.hp = 1
                 break
-        if selection == "4":
+        if selection == "5":
             continue
     elif selection == "2":
         print("당신은 있는 힘껏 도망쳤습니다.")
