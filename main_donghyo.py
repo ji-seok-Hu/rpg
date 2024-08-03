@@ -50,6 +50,7 @@ class Hero(Body):
     total_attack_mp = 30
     random_attack_harm = 45
     random_attack_mp = 10
+    kill_mp = 80
     def __init__(self):
         super().__init__(300, 30, '영웅')
         self.mp = 100
@@ -115,15 +116,7 @@ class Hero(Body):
 
         return True
     def random_attack_ver2(self, monster_list) -> bool:
-        """
-        random_attack(self, monster_list)
-        attacks a random monster on the field
-        Args:
-            monster_list -> List of monster objects
-        Return:
-            False -> attack failed
-            True -> attack succeed
-        """
+
         is_mana_enough = self.use_mp(self.random_attack_mp)
         if not is_mana_enough:
             return False        
@@ -144,8 +137,14 @@ class Hero(Body):
         elif len(monster_list) <2:
             monster.get_damage(harm)
             return True
-        
-
+    
+    
+    def instant_death(self, target):
+        is_mana_enough = self.use_mp(self.kill_mp)
+        if not is_mana_enough:
+            return False
+        target.get_damage(target.hp)
+        return True
 # Game class
 class Field:
     monster_cls_list = [Slime, Zombie, Skeleton]
@@ -234,8 +233,9 @@ while True:
                 f"2. 전체 공격 (피해 {hero.total_attack_harm}, 기력 {hero.total_attack_mp} 소모, 모든 대상 지정)\n" +
                 f"3. 무작위 공격 (피해 {hero.random_attack_harm}, 기력 {hero.random_attack_mp} 소모, 무작위 대상 지정)\n" +
                 f"4. 스킬사용 <검 부메랑> (피해 {hero.random_attack_harm}, 기력 {hero.random_attack_mp} 소모, 무작위 대상2명 지정 )\n"+
-                f"5. 돌아가기\n"+
-                f"6. 숨겨진 치트키 사용 (체력을 1로 만드는 반 즉사기)"
+                f"5  스킬사용 <즉사저주> (즉사, 기력 {hero.kill_mp} 소모, 지정대상 )\n"+
+                f"6. 돌아가기\n"+
+                f"7. 숨겨진 치트키 사용 (체력을 1로 만드는 반 즉사기)"
 
             )
             if selection == "1":
@@ -268,13 +268,24 @@ while True:
                     break
                 else:
                     print("기력이 부족합니다.")
-            elif selection == "5" :
+            elif selection == "5":
+                Field.status_monster()
+                selection = input("공격할 대상을 지정하십시오. 왼쪽 몬스터부터 1, 2, 3... 번째 몬스터입니다.")  
+                index = int(selection) - 1 
+
+                target = Field.return_monsters_all()[index]
+                hero.instant_death(target)
+                print( f"당신은 {target.name} 에게 즉사의 저주를 겁니다.\n" +
+                       f"{target.name}을 쓰러트렸습니다.")
+
                 break
             elif selection == "6" :
+                break
+            elif selection == "7" :
                 print("당신은 치트키를 사용하다가 실수로 자신을 지정하였습니다.")
                 hero.hp = 1
                 break
-        if selection == "5":
+        if selection == "6":
             continue
     elif selection == "2":
         print("당신은 있는 힘껏 도망쳤습니다.")
