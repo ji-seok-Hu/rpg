@@ -311,11 +311,15 @@ while True:
     
     ## alive check section
     monster_list:list[Body] = Field.opponent_field
+    pop_index_list = [] # alive check 가 끝나고 난 뒤의 리스트
     for i in range(len(monster_list)):
         body = monster_list[i]
-        if not body.is_alive:
-            monster_list.pop(i)
-            i -= 1
+        if body.is_alive:
+            # monster_list.pop(i)
+            pop_index_list.append(body)
+    monster_list.clear()
+    monster_list += pop_index_list
+    
     
     if not hero.is_alive:
         print("당신은 사망했습니다.")
