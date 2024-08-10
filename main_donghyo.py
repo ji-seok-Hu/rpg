@@ -48,8 +48,9 @@ class Skeleton(Body):
 class Big_Slime(Body):
     def __init__(self):
         super().__init__(random.randint(300, 401), 15, '중슬')
-
-
+class bomb_bat(Body):
+    def __init__(self):
+        super().__init__(random.randint(50, 70), 40, '폭박')
 
 
 class Hero(Body):
@@ -154,7 +155,7 @@ class Hero(Body):
         return True
 # Game class
 class Field:
-    monster_cls_list = [Slime, Zombie, Skeleton,Big_Slime]
+    monster_cls_list = [Slime, Zombie, Skeleton,Big_Slime,bomb_bat]
     opponent_field = []
 
     @classmethod
@@ -321,13 +322,14 @@ while True:
     pop_index_list = [] # alive check 가 끝나고 난 뒤의 리스트
     for i in range(len(monster_list)):
         body = monster_list[i]
-        # if body.name == "중슬":
-        #     print("ok")
-        #     if body.is_alive == False:
-        #         print("ok")
-        #         Field.opponent_field.append(Slime())
-        #         print("ok")
-
+        if body.name == "중슬":
+            if body.is_alive == False:
+                pop_index_list.append(Slime())
+                pop_index_list.append(Slime())
+        if body.name == "폭박":
+            if body.is_alive == False:
+                print("폭탄 박쥐가 자폭하며 당신에게 10 만큼의 피해를 입힙니다!")
+                hero.get_damage(10)
         if body.is_alive:
             pop_index_list.append(body)
         
