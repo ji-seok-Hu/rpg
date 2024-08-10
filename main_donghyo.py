@@ -1,5 +1,4 @@
 import random
-import time
 
 
 # Monster classes
@@ -18,6 +17,8 @@ class Body:
         Args:
             damage -> int    
         """
+
+        
         if self.is_alive == False:
             return
         self.hp -= damage
@@ -37,13 +38,19 @@ class Body:
 
 class Slime(Body): 
     def __init__(self):
-        super().__init__(100, 10, '슬라임')
+        super().__init__(random.randint(50, 101), 10, '슬라임')
 class Zombie(Body): 
     def __init__(self):
-        super().__init__(200, 15, '좀비')
+        super().__init__(random.randint(150, 201), 15, '좀비')
 class Skeleton(Body): 
     def __init__(self):
-        super().__init__(200, 20, '해골병사')
+        super().__init__(random.randint(175, 201), 20, '해골병사')
+class Big_Slime(Body):
+    def __init__(self):
+        super().__init__(random.randint(300, 401), 15, '중슬')
+
+
+
 
 class Hero(Body):
     total_attack_harm = 10
@@ -147,7 +154,7 @@ class Hero(Body):
         return True
 # Game class
 class Field:
-    monster_cls_list = [Slime, Zombie, Skeleton]
+    monster_cls_list = [Slime, Zombie, Skeleton,Big_Slime]
     opponent_field = []
 
     @classmethod
@@ -308,18 +315,27 @@ while True:
         print(f"{monster.name} 이 당신에게 {monster.harm} 만큼의 피해를 입힙니다!")
         monster.basic_attack(hero)
     
-    
+
     ## alive check section
     monster_list:list[Body] = Field.opponent_field
     pop_index_list = [] # alive check 가 끝나고 난 뒤의 리스트
     for i in range(len(monster_list)):
         body = monster_list[i]
+        # if body.name == "중슬":
+        #     print("ok")
+        #     if body.is_alive == False:
+        #         print("ok")
+        #         Field.opponent_field.append(Slime())
+        #         print("ok")
+
         if body.is_alive:
-            # monster_list.pop(i)
             pop_index_list.append(body)
+        
     monster_list.clear()
     monster_list += pop_index_list
     
+    
+
     
     if not hero.is_alive:
         print("당신은 사망했습니다.")
