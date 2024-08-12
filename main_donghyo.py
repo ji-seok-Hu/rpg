@@ -8,7 +8,8 @@ class Body:
         self.harm = harm
         self.name = name
         self.is_alive = True
-    
+
+
     def get_damage(self, damage):
         """
         get_damage(self, damage)
@@ -33,8 +34,8 @@ class Body:
         Args:
             target->: Body object    
         """
+
         target.get_damage(self.harm)
-        
 
 class Slime(Body): 
     def __init__(self):
@@ -51,7 +52,9 @@ class Big_Slime(Body):
 class bomb_bat(Body):
     def __init__(self):
         super().__init__(random.randint(50, 70), 40, '폭박')
-
+class Shield(Body):
+    def __init__(self):
+        super().__init__(80, 0, '방어막')
 
 class Hero(Body):
     total_attack_harm = 10
@@ -59,10 +62,12 @@ class Hero(Body):
     random_attack_harm = 45
     random_attack_mp = 10
     kill_mp = 80
+    preparation = False
     def __init__(self):
+        global preparation 
         super().__init__(300, 30, '영웅')
         self.mp = 100
-    
+
     def reset(self):
         self.__init__()
 
@@ -217,7 +222,8 @@ class Field:
 hero = Hero()
 Field.random_summon(1, 4)
 Field.summons_string_print()
-
+shield = Shield()
+shield.is_alive = False
 while True:
     print()
     Field.status_monster()
@@ -225,7 +231,7 @@ while True:
     print(f"당신의 체력 : {hero.hp}")
     print(f"당신의 기력 : {hero.mp}")
     print()
-
+    probability = [0,0,0,0,0,1,1,1,1,1]
     ## user input section
     selection = input(
         "어떤 행동을 하시겠습니까?\n" +  
@@ -235,6 +241,7 @@ while True:
         )
     if selection == "1":
         while True:
+            Body.preparation = False
             selection = input(
                 "어떤 스킬을 사용하시겠습니까?\n" +
                 f"1. 기본 공격 (피해 {hero.harm}, 대상 지정)\n" + 
@@ -243,8 +250,10 @@ while True:
                 f"4. 스킬사용 <검 부메랑> (피해 {hero.random_attack_harm}, 기력 {hero.random_attack_mp} 소모, 무작위 대상2명 지정 )\n"+
                 f"5  스킬사용 <즉사저주> (즉사, 기력 {hero.kill_mp} 소모, 지정대상 )\n"+
                 f"6. 돌아가기\n"+
-                f"7. 숨겨진 치트키 사용 (체력을 1로 만드는 반 즉사기)"
-
+                f"7. 숨겨진 치트키 사용 (체력을 1로 만드는 반 즉사기)\n"+
+                f"8. 특수스킬 <준비운동> 을 사용합니다. (도주확률 +10% and harm +2)\n" +
+                f"9. 특수스킬 <어둠의 고동효 중2 회복술>을 사용합니다. (랜덤 몬스터 소환후, 그 몬스터의 체력 절반만큼 회복.)\n" +
+                f"10. 특수스킬 <철옹성>을 사용합니다.(총 80의 피해를 흡수하는 방어막을 얻습니다.)"
             )
             if selection == "1":
                 Field.status_monster()
@@ -293,11 +302,38 @@ while True:
                 print("당신은 치트키를 사용하다가 실수로 자신을 지정하였습니다.")
                 hero.hp = 1
                 break
+            elif selection == "8":
+                probability = probability[1:10]
+                probability.append(1)
+                hero.harm = hero.harm + 2
+                break
+            elif selection == "9":
+                monster_cls_list = [Slime, Zombie, Skeleton]
+                random_moster = random.choice(monster_cls_list)
+                if random_moster == Slime:
+                    slime = random.randint(50, 101)
+                    hero.hp = hero.hp + slime/2
+                    print(f"슬라임을 소환합니다. 고동효 중2 회복술을 사용해 슬라임을 희생시키고 {slime/2}만큼의 체력을 회복했습니다.")
+                elif random_moster == Zombie:
+                    zombie = random.randint(150, 201)
+                    hero.hp = hero.hp + zombie/2
+                    print(f"좀비를 소환합니다. 고동효 중2 회복술을 사용해 좀비를 희생시키고 {zombie/2}만큼의 체력을 회복했습니다.")
+                elif random_moster == Skeleton:
+                    skeleton = random.randint(175, 201)
+                    hero.hp = hero.hp + skeleton/2
+                    print(f"스켈레톤을 소환합니다. 고동효 중2 회복술을 사용해 스켈레톤을 희생시키고 {skeleton/2}만큼의 체력을 회복했습니다.")
+                break
+            elif selection == "10":
+                print("철옹성을 사용합니다. 총 80의 피해를 흡수하는 방어막을 얻었습니다.")
+                shield.is_alive = True
+                break
+
+                
         if selection == "6":
             continue
     elif selection == "2":
         print("당신은 있는 힘껏 도망쳤습니다.")
-        is_success = random.randint(0,1)
+        is_success = random.choice(probability)
         if is_success == 0:
             print("하지만 그들이 더 빨랐습니다.")
             print("도주는 실패한 듯 합니다...")
@@ -316,6 +352,23 @@ while True:
         print(f"{monster.name} 이 당신에게 {monster.harm} 만큼의 피해를 입힙니다!")
         monster.basic_attack(hero)
     
+    if shield.is_alive == True:
+        monster_list:list[Body] = Field.opponent_field
+        Monster_cumulative_damage = []
+        for i in range(len(monster_list)):
+            body = monster_list[i]
+            Monster_cumulative_damage.append(body.harm)
+            damage = sum(Monster_cumulative_damage)
+        if damage <= shield.hp:
+            shield.get_damage(damage)
+            print(f"방어막이 {damage}만큼 피해를 대신 입었습니다.")
+            print(f"남은 방어막 {shield.hp}")
+            hero.hp = hero.hp + damage
+        elif damage > shield.hp:
+            shield.get_damage(damage)
+            print(f"방어막이 {shield.hp + damage} 만큼의 데미지를 받아내고 파괴되었습니다.")
+            hero.hp = hero.hp + shield.hp + damage
+            print(f" {-shield.hp} 만큼의 데미지를 입습니다.")
 
     ## alive check section
     monster_list:list[Body] = Field.opponent_field
